@@ -24,7 +24,7 @@ region="${INPUT_REGION:-${FLY_REGION:-iad}}"
 org="${INPUT_ORG:-${FLY_ORG:-personal}}"
 image="$INPUT_IMAGE"
 config="${INPUT_CONFIG:-fly.toml}"
-build_secrets=()
+build_secrets=""
 
 if ! echo "$app" | grep "$PR_NUMBER"; then
   echo "For safety, this action requires the app's name to contain the PR number."
@@ -38,10 +38,10 @@ if [ "$EVENT_TYPE" = "closed" ]; then
 fi
 echo "printing out build secrets: $INPUT_BUILD_SECRETS"
 if [ -n "$INPUT_BUILD_SECRETS" ]; then
-  echo "$INPUT_BUILD_SECRETS" | tr ' ' '\n' | while IFS= read -r ARG; do
-    build_secrets+=("--build-secret $ARG")
-  done
-fi
+   for ARG in $(echo "$INPUT_BUILD_SECRETS" | tr " " "\n"); do
+     build_secrets="$build_secrets --build-secret ${ARG}"
+   done
+ fi
 
 # Deploy the Fly app, creating it first if needed.
 if ! flyctl status --app "$app"; then
