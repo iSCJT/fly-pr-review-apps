@@ -36,7 +36,7 @@ if [ "$EVENT_TYPE" = "closed" ]; then
   flyctl apps destroy "$app" -y || true
   exit 0
 fi
-
+echo "printing out build secrets: $INPUT_BUILD_SECRETS"
 if [ -n "$INPUT_BUILD_SECRETS" ]; then
   echo "$INPUT_BUILD_SECRETS" | tr ' ' '\n' | while IFS= read -r ARG; do
     build_secrets+=("--build-secret $ARG")
@@ -47,7 +47,7 @@ fi
 if ! flyctl status --app "$app"; then
   # Backup the original config file since 'flyctl launch' messes up the [build.args] section
   cp "$config" "$config.bak"
-  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" $INPUT_LAUNCH_OPTIONS ${build_secrets}
+  flyctl launch --no-deploy --copy-config --name "$app" --image "$image" --region "$region" --org "$org" ${build_secrets} $INPUT_LAUNCH_OPTIONS
   # Restore the original config file
   cp "$config.bak" "$config"
 fi
